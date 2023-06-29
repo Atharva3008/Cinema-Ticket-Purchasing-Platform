@@ -1,5 +1,7 @@
 import express from 'express';
 import { Sequelize } from 'sequelize';
+import { CinemaController } from '../Controllers/CinemaController';
+
 
 export const sequelize = new Sequelize('postgres://username:password@localhost:5432/cinema_booking');
 export const app = express();
@@ -10,6 +12,9 @@ app.use(express.json());
 app.get('/', (req, res) => {
    res.send('Welcome to the Cinema Ticket Purchasing Platform API');
  });
+
+const cinemaController = new CinemaController(app);
+
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

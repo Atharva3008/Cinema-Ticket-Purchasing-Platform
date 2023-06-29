@@ -1,5 +1,6 @@
 import { Sequelize, Model, DataTypes } from 'sequelize';
 import { sequelize } from '../Utils/server';
+import { Cinema } from './Cinema';
 
 export class Seat extends Model {}
 Seat.init(
@@ -15,3 +16,5 @@ Seat.init(
   },
   { sequelize, modelName: 'seat' }
 );
+
+Seat.belongsTo(Cinema);
