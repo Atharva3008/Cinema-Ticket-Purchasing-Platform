@@ -35,10 +35,61 @@ export class CinemaController {
    };
 
    purchaseSeat = async (req: Request, res: Response) => {
-      
+      const { cinemaId, seatNumber } = req.params;
+      const t = await sequelize.transaction();
+      try {
+         const seat = await Seat.findOne({ where: { cinemaId, seatNumber }});
+
+         if (!seat) {
+            return res.status(404).json({ error: 'Seat not found' });
+         }
+
+         if (seat.isPurchased) {
+            return res.status(400).json({ error: 'Seat is already purchased' });
+         }
+
+         const updatedSeat = await seat.update({ isPurchased: true }, {transaction: t} );
+
+         t.commit();
+
+         res.json({ seat: updatedSeat });
+      } catch (error) {
+         console.error('Error purchasing seat:', error);
+         res.status(500).json({ error: 'Internal Server Error' });
+      }
    };
 
    purchaseConsecutiveSeats = async (req: Request, res: Response) => {
+      const { cinemaId } = req.params;
+
+      const t = await sequelize.transaction();
+      try {
+         const seats = await Seat.findAll({
+            where: { cinemaId, isPurchased: false },
+            // limit: 2,
+            order: [['seatNumber', 'ASC']],
+         });
+
+         const seatNumbers: Number[] = [];
+         for(var i=1;i<seats.length;i++) {
+            if(seats[i].seatNumber == seats[i-1].seatNumber + 1) {
+               await Seat.update({ isPurchased: true }, { where: { id: seats[i].seatNumber }, transaction: t });
+               await Seat.update({ isPurchased: true }, { where: { id: seats[i-1].seatNumber }, transaction: t });
+               t.commit();
+               seatNumbers.push(seats[i].seatNumber);
+               seatNumbers.push(seats[i].seatNumber);
+               break;
+            }
+         }
+
+         if(seatNumbers.length == 0) {
+            return res.status(400).json("No enough consecutive seats available!")
+         }
       
+         res.json({ seats: seatNumbers });
+      } catch (error) {
+         console.error('Error purchasing consecutive seats:', error);
+         res.status(500).json({ error: 'Internal Server Error' });
+      }
    };
 }
