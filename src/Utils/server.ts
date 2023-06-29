@@ -4,15 +4,10 @@ import { CinemaController } from '../Controllers/CinemaController';
 import { cinemaRoutes } from '../Routes/CinemaRoutes';
 
 
-export const sequelize = new Sequelize('postgres://username:password@localhost:5432/cinema_booking');
 export const app = express();
 const PORT = 3000;
 
-app.use(express.json());
-
-app.get('/', (req, res) => {
-   res.send('Welcome to the Cinema Ticket Purchasing Platform API');
- });
+// app.use(express.json());
 
 const cinemaController = new CinemaController(app);
 
